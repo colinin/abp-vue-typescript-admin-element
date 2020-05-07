@@ -19,11 +19,11 @@
 
 ## 截图
 
-![登录页](./images/userLogin.png))
+![登录页](./images/userLogin.png)
 
-![角色页](./images/userRoles.png))
+![角色页](./images/userRoles.png)
 
-![权限页](./images/userPermissions.png))
+![权限页](./images/userPermissions.png)
 
 ## 相关项目
 
