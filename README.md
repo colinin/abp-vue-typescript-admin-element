@@ -19,7 +19,11 @@
 
 ## 截图
 
-![主页](./demo/dashboard.png))
+![登录页](./images/userLogin.png))
+
+![角色页](./images/userRoles.png))
+
+![权限页](./images/userPermissions.png))
 
 ## 相关项目
 
@@ -173,15 +177,14 @@ yarn install
 ### 更改配置文件名称
 
 [.env.Github.production](./.env.Github.production)  变更为  .env.production
+</br>
 [vue.config.github.js ](./vue.config.github.js )   变更为  vue.config.js
 
 修改开发环境用于代理的服务器地址,以下提供了三个分别为IdentityService、IdentityServer、ApiService地址,如果有网关的话可以只需要一个网关地址即可
 
-```json
+```bash
 
     proxy: {
-      // change xxx-api/login => /mock-api/v1/login
-      // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_IDENTITY_SERVER]: {
         target: '你的identityService地址',
         changeOrigin: true,
