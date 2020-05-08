@@ -99,11 +99,13 @@
         />
       </el-tab-pane>
       <el-tab-pane
-        v-if="hasLoadPermission"
+        v-if="allowedChangePermissions() && hasLoadPermission"
         :label="$t('userProfile.permission')"
       >
         <PermissionTree
+          v-if="allowedChangePermissions()"
           :expanded="false"
+          :readonly="!checkPermission(['AbpIdentity.Users.ManagePermissions'])"
           :permission="userPermission"
           @onPermissionChanged="onPermissionChanged"
         />
@@ -143,14 +145,18 @@ import {
 } from '@/api/users'
 import { getRoles } from '@/api/roles'
 import { setPermissionsByKey, getPermissionsByKey, PermissionDto, UpdatePermissionsDto } from '@/api/permission'
-import PermissionTree from '@/components/Permission/index.vue'
+import PermissionTree from '@/components/PermissionTree/index.vue'
 import { RoleModule } from '@/store/modules/role'
 import { IRoleData, IPermission } from '@/api/types'
+import { checkPermission } from '@/utils/permission'
 
 @Component({
   name: 'UserProfile',
   components: {
     PermissionTree
+  },
+  methods: {
+    checkPermission
   }
 })
 export default class extends Vue {
@@ -215,10 +221,17 @@ export default class extends Vue {
   mounted() {
     this.handleGetRoles()
     if (this.userProfile.id) {
-      this.handleGetUserPermissions(this.userProfile.id)
+      if (this.allowedChangePermissions()) {
+        this.handleGetUserPermissions(this.userProfile.id)
+      }
       this.handleGetUserRoles(this.userProfile.id)
       this.hasEditUser = true
     }
+  }
+
+  /** 允许变更权限 */
+  private allowedChangePermissions() {
+    return checkPermission(['AbpIdentity.Users.ManagePermissions'])
   }
 
   private handleGetUserPermissions(id: string) {
@@ -289,7 +302,7 @@ export default class extends Vue {
           this.userProfile.creatorTime = data.creatorTime
           this.userProfile.concurrencyStamp = data.concurrencyStamp
           this.userProfile.tenentId = data.tenentId
-          this.$message.success(this.$t('createUserSuccess', { name: this.userProfile.name }).toString())
+          this.$message.success(this.$t('users.createUserSuccess', { name: this.userProfile.name }).toString())
         } else {
           const updateUserInput = new UserUpdateDto()
           updateUserInput.name = this.userProfile.name
@@ -306,7 +319,7 @@ export default class extends Vue {
           this.userProfile.lastModificationTime = data.lastModificationTime
           this.userProfile.concurrencyStamp = data.concurrencyStamp
           this.userProfile.tenentId = data.tenentId
-          this.$message.success(this.$t('updateUserSuccess', { name: this.userProfile.name }).toString())
+          this.$message.success(this.$t('users.updateUserSuccess', { name: this.userProfile.name }).toString())
         }
         if (this.userRolesChanged) {
           await setUserRoles(this.userProfile.id, this.userRoles)

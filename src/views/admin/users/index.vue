@@ -237,12 +237,12 @@ export default class extends Vue {
 
   /** 查询用户列表 */
   private handleGetUsers() {
+    this.userListLoading = true
     const getUserListInput = new UsersGetRequestDto()
     getUserListInput.filter = this.getUserQuery.filter
     getUserListInput.sorting = this.sortRule.sort
     getUserListInput.skipCount = this.getUserQuery.page
     getUserListInput.maxResultCount = this.getUserQuery.limit
-    this.userListLoading = false
     getUsers(getUserListInput).then(res => {
       this.totalCount = res.data.totalCount
       this.userList = res.data.items

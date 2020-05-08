@@ -5,10 +5,10 @@ import Router, { RouteConfig } from 'vue-router'
 import Layout from '@/layout/index.vue'
 
 /* Router modules */
-import componentsRouter from './modules/components'
-import chartsRouter from './modules/charts'
-import tableRouter from './modules/table'
-import nestedRouter from './modules/nested'
+// import componentsRouter from './modules/components'
+// import chartsRouter from './modules/charts'
+// import tableRouter from './modules/table'
+// import nestedRouter from './modules/nested'
 
 Vue.use(Router)
 
@@ -89,53 +89,35 @@ export const constantRoutes: RouteConfig[] = [
       }
     ]
   },
+  // // {
+  // //   path: '/documentation',
+  // //   component: Layout,
+  // //   children: [
+  // //     {
+  // //       path: 'index',
+  // //       component: () => import(/* webpackChunkName: "documentation" */ '@/views/documentation/index.vue'),
+  // //       name: 'Documentation',
+  // //       meta: { title: 'documentation', icon: 'documentation', affix: true }
+  // //     }
+  // //   ]
+  // // },
   // {
-  //   path: '/documentation',
+  //   path: '/guide',
   //   component: Layout,
+  //   redirect: '/guide/index',
   //   children: [
   //     {
   //       path: 'index',
-  //       component: () => import(/* webpackChunkName: "documentation" */ '@/views/documentation/index.vue'),
-  //       name: 'Documentation',
-  //       meta: { title: 'documentation', icon: 'documentation', affix: true }
+  //       component: () => import(/* webpackChunkName: "guide" */ '@/views/guide/index.vue'),
+  //       name: 'Guide',
+  //       meta: {
+  //         title: 'guide',
+  //         icon: 'guide',
+  //         noCache: true
+  //       }
   //     }
   //   ]
   // },
-  {
-    path: '/guide',
-    component: Layout,
-    redirect: '/guide/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import(/* webpackChunkName: "guide" */ '@/views/guide/index.vue'),
-        name: 'Guide',
-        meta: {
-          title: 'guide',
-          icon: 'guide',
-          noCache: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/profile',
-    component: Layout,
-    redirect: '/profile/index',
-    meta: { hidden: true },
-    children: [
-      {
-        path: 'index',
-        component: () => import(/* webpackChunkName: "profile" */ '@/views/profile/index.vue'),
-        name: 'Profile',
-        meta: {
-          title: 'profile',
-          icon: 'user',
-          noCache: true
-        }
-      }
-    ]
-  },
   {
     path: '/icon',
     component: Layout,
@@ -153,65 +135,10 @@ export const constantRoutes: RouteConfig[] = [
     ]
   },
   /** when your routing map is too long, you can split it into small modules **/
-  componentsRouter,
-  chartsRouter,
-  nestedRouter,
-  tableRouter,
-  {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/list',
-    meta: {
-      title: 'example',
-      icon: 'example'
-    },
-    children: [
-      {
-        path: 'create',
-        component: () => import(/* webpackChunkName: "example-create" */ '@/views/example/create.vue'),
-        name: 'CreateArticle',
-        meta: {
-          title: 'createArticle',
-          icon: 'edit'
-        }
-      },
-      {
-        path: 'edit/:id(\\d+)',
-        component: () => import(/* webpackChunkName: "example-edit" */ '@/views/example/edit.vue'),
-        name: 'EditArticle',
-        meta: {
-          title: 'editArticle',
-          noCache: true,
-          activeMenu: '/example/list',
-          hidden: true
-        }
-      },
-      {
-        path: 'list',
-        component: () => import(/* webpackChunkName: "example-list" */ '@/views/example/list.vue'),
-        name: 'ArticleList',
-        meta: {
-          title: 'articleList',
-          icon: 'list'
-        }
-      }
-    ]
-  },
-  {
-    path: '/tab',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import(/* webpackChunkName: "tab" */ '@/views/tab/index.vue'),
-        name: 'Tab',
-        meta: {
-          title: 'tab',
-          icon: 'tab'
-        }
-      }
-    ]
-  },
+  // componentsRouter,
+  // chartsRouter,
+  // nestedRouter,
+  // tableRouter,
   {
     path: '/error',
     component: Layout,
@@ -240,135 +167,6 @@ export const constantRoutes: RouteConfig[] = [
         }
       }
     ]
-  },
-  {
-    path: '/error-log',
-    component: Layout,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'log',
-        component: () => import(/* webpackChunkName: "error-log" */ '@/views/error-log/index.vue'),
-        name: 'ErrorLog',
-        meta: {
-          title: 'errorLog',
-          icon: 'bug'
-        }
-      }
-    ]
-  },
-  {
-    path: '/excel',
-    component: Layout,
-    redirect: '/excel/export-excel',
-    meta: {
-      title: 'excel',
-      icon: 'excel'
-    },
-    children: [
-      {
-        path: 'export-excel',
-        component: () => import(/* webpackChunkName: "export-excel" */ '@/views/excel/export-excel.vue'),
-        name: 'ExportExcel',
-        meta: { title: 'exportExcel' }
-      },
-      {
-        path: 'export-selected-excel',
-        component: () => import(/* webpackChunkName: "select-excel" */ '@/views/excel/select-excel.vue'),
-        name: 'SelectExcel',
-        meta: { title: 'selectExcel' }
-      },
-      {
-        path: 'export-merge-header',
-        component: () => import(/* webpackChunkName: "merge-header" */ '@/views/excel/merge-header.vue'),
-        name: 'MergeHeader',
-        meta: { title: 'mergeHeader' }
-      },
-      {
-        path: 'upload-excel',
-        component: () => import(/* webpackChunkName: "upload-excel" */ '@/views/excel/upload-excel.vue'),
-        name: 'UploadExcel',
-        meta: { title: 'uploadExcel' }
-      }
-    ]
-  },
-  {
-    path: '/zip',
-    component: Layout,
-    redirect: '/zip/download',
-    meta: {
-      title: 'zip',
-      icon: 'zip',
-      alwaysShow: true // will always show the root menu
-    },
-    children: [
-      {
-        path: 'download',
-        component: () => import(/* webpackChunkName: "zip" */ '@/views/zip/index.vue'),
-        name: 'ExportZip',
-        meta: { title: 'exportZip' }
-      }
-    ]
-  },
-  {
-    path: '/pdf',
-    component: Layout,
-    redirect: '/pdf/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import(/* webpackChunkName: "pdf" */ '@/views/pdf/index.vue'),
-        name: 'PDF',
-        meta: {
-          title: 'pdf',
-          icon: 'pdf'
-        }
-      }
-    ]
-  },
-  {
-    path: '/pdf-download-example',
-    component: () => import(/* webpackChunkName: "pdf-download-example" */ '@/views/pdf/download.vue'),
-    meta: { hidden: true }
-  },
-  {
-    path: '/theme',
-    component: Layout,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'index',
-        component: () => import(/* webpackChunkName: "theme" */ '@/views/theme/index.vue'),
-        name: 'Theme',
-        meta: {
-          title: 'theme',
-          icon: 'theme'
-        }
-      }
-    ]
-  },
-  {
-    path: '/clipboard',
-    component: Layout,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'index',
-        component: () => import(/* webpackChunkName: "clipboard" */ '@/views/clipboard/index.vue'),
-        name: 'Clipboard',
-        meta: {
-          title: 'clipboard',
-          icon: 'clipboard'
-        }
-      }
-    ]
-  },
-  {
-    path: 'https://github.com/Armour/vue-typescript-admin-template',
-    meta: {
-      title: 'externalLink',
-      icon: 'link'
-    }
   }
 ]
 
@@ -457,7 +255,10 @@ export const asyncRoutes: RouteConfig[] = [
     path: '/admin',
     component: Layout,
     meta: {
-        roles: ['AbpIdentity.Users']
+      title: 'admin',
+      icon: 'manager',
+      roles: ['AbpIdentity.Users', 'AbpIdentity.Roles'], // you can set roles in root nav
+      alwaysShow: true // will always show the root menu
     },
     children: [
       {
@@ -468,6 +269,34 @@ export const asyncRoutes: RouteConfig[] = [
           title: 'users',
           icon: 'user',
           roles: ['AbpIdentity.Users']
+        }
+      },
+      {
+        path: 'roles',
+        component: () => import('@/views/admin/roles/index.vue'),
+        name: 'roles',
+        meta: {
+          title: 'roles',
+          icon: 'role',
+          roles: ['AbpIdentity.Roles']
+        }
+      }
+    ]
+  },
+  {
+    path: '/profile',
+    component: Layout,
+    redirect: '/profile/index',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'index',
+        component: () => import(/* webpackChunkName: "profile" */ '@/views/profile/index.vue'),
+        name: 'Profile',
+        meta: {
+          title: 'profile',
+          icon: 'user',
+          noCache: true
         }
       }
     ]

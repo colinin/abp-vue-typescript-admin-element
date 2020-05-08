@@ -49,6 +49,25 @@
           </div>
         </div>
       </el-tab-pane>
+      <el-tab-pane label="IView Icons">
+        <div class="grid">
+          <div
+            v-for="item of iviewIcons"
+            :key="item"
+            @click="handleClipboard(generateIViewIconCode(item),$event)"
+          >
+            <el-tooltip placement="top">
+              <div slot="content">
+                {{ generateIViewIconCode(item) }}
+              </div>
+              <div class="icon-item">
+                <i :class="'ivu-icon ivu-icon-' + item" />
+                <span>{{ item }}</span>
+              </div>
+            </el-tooltip>
+          </div>
+        </div>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -57,6 +76,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { handleClipboard } from '@/utils/clipboard'
 import elementIcons from './element-icons'
+import iviewIcons from './iview-icons'
 import svgIcons from './svg-icons'
 
 @Component({
@@ -64,11 +84,16 @@ import svgIcons from './svg-icons'
 })
 export default class extends Vue {
   private svgIcons = svgIcons
+  private iviewIcons = iviewIcons
   private elementIcons = elementIcons
   private handleClipboard = handleClipboard
 
   private generateElementIconCode(symbol: string) {
     return `<i class="el-icon-${symbol}" />`
+  }
+
+  private generateIViewIconCode(symbol: string) {
+    return `<i class="ivu-icon ivu-icon-${symbol}" />`
   }
 
   private generateSvgIconCode(symbol: string) {

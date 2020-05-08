@@ -1,5 +1,5 @@
 import { VuexModule, Module, Mutation, Action, getModule } from 'vuex-module-decorators'
-import { getTenant } from '@/api/tenant'
+import { getTenantByName } from '@/api/tenant'
 import { getTenant as CurrentTenant, setTenant, removeTenant } from '@/utils/cookies'
 import store from '@/store'
 
@@ -18,7 +18,7 @@ class Tenant extends VuexModule implements IMultiTenant {
 
   @Action({ rawError: true })
   public async getTenant(name: string) {
-    const { data } = await getTenant(name)
+    const { data } = await getTenantByName(name)
     if (data.success) {
       this.SET_TENANT(data.tenantId)
       setTenant(data.tenantId)

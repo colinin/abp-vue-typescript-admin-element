@@ -65,7 +65,8 @@ export default {
     profile: '个人中心',
     tasks: '任务中心',
     admin: '管理页',
-    users: '用户管理'
+    users: '用户管理',
+    roles: '角色管理'
   },
   navbar: {
     logOut: '退出登录',
@@ -220,6 +221,32 @@ export default {
     pleaseInputPhoneNumber: '请输入联系方式',
     pleaseInputEmail: '请输入邮件地址',
     pleaseInputPassword: '请输入用户密码',
-    pleaseConfirmPassword: '请再次输入用户密码',
+    pleaseConfirmPassword: '请再次输入用户密码'
+  },
+  roles: {
+    refreshList: '刷新列表',
+    id: '角色标识',
+    name: '角色名称',
+    type: '角色类型',
+    system: '内置角色',
+    custom: '用户定义',
+    isDefault: '默认角色',
+    isPublic: '公共角色',
+    isPrivate: '私有角色',
+    operaActions: '操作方法',
+    updateRole: '编辑角色',
+    deleteRole: '删除角色',
+    createRole: '新建角色',
+    permission: '分配权限',
+    otherOpera: '更多操作',
+    setDefault: '设为默认',
+    unSetDefault: '取消默认',
+    delNotRecoverData: '请注意,删除后不可恢复!',
+    whetherDeleteRole: '是否删除角色 {name} ?',
+    roleHasBeenDeleted: '角色 {name} 已删除!',
+    roleHasBeenSetDefault: '{name} 已设置为默认角色!',
+    createRoleSuccess: '角色 {name} 添加成功!',
+    pleaseInputRoleName: '请输入角色名称',
+    roleNameIsRequired: '角色名称不能为空!'
   }
 }

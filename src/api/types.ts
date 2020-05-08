@@ -44,8 +44,11 @@ export interface IUserData {
   roles: string[]
 }
 
+/** 授权接口 */
 export interface IPermission {
+  /** 权限名称 */
   name: string
+  /** 是否授权 */
   isGranted: boolean
 }
 
