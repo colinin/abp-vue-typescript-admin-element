@@ -157,7 +157,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { isValidURL } from '@/utils/validate'
 import { getArticle, defaultArticleData } from '@/api/articles'
-import { getUsers, UsersGetRequestDto, UserDataDto } from '@/api/users'
+import { UserApiService, UsersGetRequestDto, UserDataDto } from '@/api/users'
 import { AppModule } from '@/store/modules/app'
 import { TagsViewModule, ITagView } from '@/store/modules/tags-view'
 import MaterialInput from '@/components/MaterialInput/index.vue'
@@ -183,6 +183,12 @@ import { Form } from 'element-ui'
 })
 export default class extends Vue {
   @Prop({ default: false }) private isEdit!: boolean
+  private userApiService: UserApiService
+
+  constructor() {
+    super()
+    this.userApiService = new UserApiService()
+  }
 
   private validateRequire = (rule: any, value: string, callback: Function) => {
     if (value === '') {
@@ -342,9 +348,9 @@ export default class extends Vue {
   private async getRemoteUserList(name: string) {
     const getUsersData = new UsersGetRequestDto()
     getUsersData.filter = name
-    getUsers(getUsersData).then(res => {
-      if (!res.data.items) return
-      this.userListOptions = res.data.items.map((v: UserDataDto) => v.name)
+    this.userApiService.getUsers(getUsersData).then(res => {
+      if (!res.items) return
+      this.userListOptions = res.items.map((v: UserDataDto) => v.name)
     })
   }
 }

@@ -218,8 +218,8 @@ export const asyncRoutes: RouteConfig[] = [
         component: () => import(/* webpackChunkName: "permission-directive" */ '@/views/permission/directive.vue'),
         name: 'DirectivePermission',
         meta: {
-            title: 'directivePermission'
-            // if do not set roles, means: this page does not require permission
+          title: 'directivePermission'
+          // if do not set roles, means: this page does not require permission
         }
       },
       {
@@ -227,17 +227,17 @@ export const asyncRoutes: RouteConfig[] = [
         component: () => import(/* webpackChunkName: "permission-role" */ '@/views/permission/role.vue'),
         name: 'RolePermission',
         meta: {
-            title: 'rolePermission',
-            roles: ['admin']
+          title: 'rolePermission',
+          roles: ['admin']
         }
-      },
+      }
     ]
   },
   {
     path: '/i18n',
     component: Layout,
     meta: {
-        roles: ['AbpIdentity.Roles']
+      roles: ['AbpIdentity.Roles']
     },
     children: [
       {
@@ -261,6 +261,16 @@ export const asyncRoutes: RouteConfig[] = [
       alwaysShow: true // will always show the root menu
     },
     children: [
+      {
+        path: 'settings',
+        component: () => import('@/views/admin/settings/index.vue'),
+        name: 'settings',
+        meta: {
+          title: 'settings',
+          icon: 'setting',
+          roles: ['AbpSettingManagement.Settings']
+        }
+      },
       {
         path: 'users',
         component: () => import('@/views/admin/users/index.vue'),

@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import { UserModule } from '@/store/modules/user'
-import { TenantModule } from '@/store/modules/tenant'
+import { getTenant } from '@/utils/sessions'
+import { getLanguage } from '@/utils/cookies'
 
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
@@ -16,9 +17,13 @@ service.interceptors.request.use(
     if (UserModule.token) {
       config.headers.Authorization = UserModule.token
     }
-    console.log('CurrentTenant  =====> ' + TenantModule.tenantId)
-    if (TenantModule.tenantId) {
-      config.headers.__tenant = TenantModule.tenantId
+    const tenantId = getTenant()
+    if (tenantId) {
+      config.headers.__tenant = tenantId
+    }
+    // abp官方类库用的 zh-Hans 的简体中文包 这里直接粗暴一点
+    if (getLanguage()?.indexOf('zh') !== -1) {
+      config.headers['Accept-Language'] = 'zh-Hans'
     }
     return config
   },
@@ -50,7 +55,7 @@ service.interceptors.response.use(
     if (error.response.status === 429) {
       console.log(error.response.data)
       Message({
-        message: '请求流量峰值已达服务器设置上限,请稍后再试!',
+        message: '您的操作过快,请稍后再试!',
         type: 'warning',
         duration: 5 * 1000
       })

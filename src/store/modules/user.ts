@@ -1,9 +1,10 @@
 import { VuexModule, Module, Action, Mutation, getModule } from 'vuex-module-decorators'
-import { userLogin, userLogout, getUserInfo, UserLoginData } from '@/api/users'
+import { UserApiService, UserLoginData } from '@/api/users'
+import { getTenantByName } from '@/api/tenant'
 import { getToken, setToken, removeToken, getRefreshToken, setRefreshToken } from '@/utils/cookies'
 import { resetRouter } from '@/router'
 import { TagsViewModule } from './tags-view'
-import { TenantModule } from '@/store/modules/tenant'
+import { removeTenant, setTenant } from '@/utils/sessions'
 import { PermissionModule } from '@/store/modules/permission'
 import store from '@/store'
 
@@ -25,6 +26,8 @@ class User extends VuexModule implements IUserState {
   public introduction = ''
   public roles: string[] = []
   public email = ''
+
+  private userService = new UserApiService()
 
   @Mutation
   private SET_TOKEN(token: string) {
@@ -62,22 +65,23 @@ class User extends VuexModule implements IUserState {
       // }).catch(err => {
       //   console.log('error ====>' + err)
       // })
-      await TenantModule.getTenant(userInfo.tenantName)
+      const { data } = await getTenantByName(userInfo.tenantName)
+      setTenant(data.tenantId)
     }
-    const { data } = await userLogin(userLoginData)
-    const token = data.token_type + ' ' + data.access_token
+    const loginResult = await this.userService.userLogin(userLoginData)
+    const token = loginResult.token_type + ' ' + loginResult.access_token
     setToken(token)
     this.SET_TOKEN(token)
-    setRefreshToken(data.refresh_token)
-    this.SET_REFRESH_TOKEN(data.refresh_token)
+    setRefreshToken(loginResult.refresh_token)
+    this.SET_REFRESH_TOKEN(loginResult.refresh_token)
   }
 
   @Action
   public ResetToken() {
     removeToken()
+    removeTenant()
     this.SET_TOKEN('')
     this.SET_ROLES([])
-    TenantModule.removeTenant()
   }
 
   @Action
@@ -85,9 +89,9 @@ class User extends VuexModule implements IUserState {
     if (this.token === '') {
       throw Error('GetUserInfo: token is undefined!')
     }
-    const { data } = await getUserInfo()
-    this.SET_NAME(data.name)
-    this.SET_EMAIL(data.email)
+    const userInfo = await this.userService.getUserInfo()
+    this.SET_NAME(userInfo.name)
+    this.SET_EMAIL(userInfo.email)
   }
 
   // @Action
@@ -111,7 +115,7 @@ class User extends VuexModule implements IUserState {
     if (this.token === '') {
       throw Error('LogOut: token is undefined!')
     }
-    await userLogout(getRefreshToken())
+    await this.userService.userLogout(getRefreshToken())
     removeToken()
     resetRouter()
     // Reset visited views and cached views

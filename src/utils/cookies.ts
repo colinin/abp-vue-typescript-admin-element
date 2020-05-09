@@ -21,12 +21,6 @@ export const setToken = (token: string) => Cookies.set(tokenKey, token)
 export const getRefreshToken = () => Cookies.get(refreshTokenKey)
 export const setRefreshToken = (token: string) => Cookies.set(refreshTokenKey, token)
 export const removeToken = () => {
-    Cookies.remove(tokenKey)
-    return Cookies.remove(refreshTokenKey)
+  Cookies.remove(tokenKey)
+  return Cookies.remove(refreshTokenKey)
 }
-
-// Tenant
-const tenantKey = 'vue_typescript_admin_tenant'
-export const getTenant = () => Cookies.get(tenantKey)
-export const setTenant = (tenantId: string) => Cookies.set(tenantKey, tenantId)
-export const removeTenant = () => Cookies.remove(tenantKey)

@@ -1,220 +1,134 @@
 import qs from 'querystring'
-import request from '@/utils/request'
-import { PagedAndSortedResultRequestDto, FullAuditedEntityDto } from '@/api/types'
+import { pagerFormat } from '@/utils/index'
+import { PagedAndSortedResultRequestDto, FullAuditedEntityDto, PagedResultDto } from '@/api/types'
+import { ApiServiceBase } from './serviceBase'
 
-const IdentityServiceUrl = process.env.VUE_APP_BASE_IDENTITY_SERVICE
-const IdentityServerUrl = process.env.VUE_APP_BASE_IDENTITY_SERVER
-/** 获取用户列表
- * @input 类型为 UsersGetRequestDto 的查询对象
- */
-export function getUsers(input: UsersGetRequestDto) {
-  let _url = '/api/identity/users'
-  if (input.skipCount > 0) {
-    input.skipCount -= 1
+export class UserApiService extends ApiServiceBase {
+  IdentityServiceUrl = process.env.VUE_APP_BASE_IDENTITY_SERVICE
+  IdentityServerUrl = process.env.VUE_APP_BASE_IDENTITY_SERVER
+  constructor() {
+    super()
+    this.BaseUrl = this.IdentityServiceUrl
   }
-  _url += '?skipCount=' + input.skipCount
-  _url += '&maxResultCount=' + input.maxResultCount
-  if (input.sorting) {
-    _url += '&sorting=' + input.sorting
-  }
-  if (input.filter) {
-    _url += '&filter=' + input.filter
-  }
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'get'
-  })
-}
 
-/** 通过用户名获取用户信息
- * @param userName 用户名
- * @returns 返回类型为 UserDataDto  的用户信息
- */
-export function getUserById(userId: string) {
-  let _url = '/api/identity/users/'
-  _url += userId
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'get'
-  })
-}
-
-/** 通过用户名获取用户信息
- * @param userName 用户名
- * @returns 返回类型为 UserDataDto  的用户信息
- */
-export function getUserByName(userName: string) {
-  let _url = '/api/identity/users/by-username/'
-  _url += userName
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'get'
-  })
-}
-
-/** 变更用户信息
- * @param userId  用户标识
- * @param userData  变更信息
- * @returns 返回类型为 UserDataDto  的用户信息
- */
-export function updateUser(userId: string | undefined, userData: UserUpdateDto) {
-  let _url = '/api/identity/users/'
-  _url += userId
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'put',
-    data: userData
-  })
-}
-
-/** 删除用户
- * @param userId 用户标识
- * @returns 无返回值
- */
-export function deleteUser(userId: string | undefined) {
-  let _url = '/api/identity/users/'
-  _url += userId
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'delete'
-  })
-}
-
-/** 新增用户
- * @param createUser 创建用户信息
- * @returns 返回类型为 UserDataDto  的用户信息
- */
-export function createUser(userData: UserCreateDto) {
-  const _url = '/api/identity/users'
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'POST',
-    data: userData
-  })
-}
-
-/** 获取用户角色组
- * @param userId 用户标识
- * @returns 返回类型为 UserRoleDto  的用户角色组信息
- */
-export function getUserRoles(userId: string) {
-  let _url = '/api/identity/users'
-  _url += '/' + userId
-  _url += '/roles'
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'GET'
-  })
-}
-
-/** 设置用户角色组
- * @param userId 用户标识
- * @param roles 角色组
- * @returns 无返回值
- */
-export function setUserRoles(userId: string, roles: string[]) {
-  let _url = '/api/identity/users'
-  _url += '/' + userId
-  _url += '/roles'
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'PUT',
-    data: { RoleNames: roles }
-  })
-}
-
-/** 变更用户密码
- * @param input 变更密码对象
- */
-export function changePassword(input: UserChangePasswordDto) {
-  const _url = '/api/identity/my-profile/change-password'
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'POST',
-    data: input
-  })
-}
-
-/** 注册新用户
- * @param registerData 用户注册对象
- * @returns 返回类型为 UserDataDto  的用户信息
- */
-export function userRegister(registerData: UserRegisterData) {
-  const _url = '/api/account/register'
-  return request({
-    baseURL: IdentityServiceUrl,
-    url: _url,
-    method: 'post',
-    data: registerData
-  })
-}
-
-/** 用户登录
- * @param loginData 用户登录对象
- * @returns 返回用户登录对象
- */
-export function userLogin(loginData: UserLoginData) {
-  const _url = '/connect/token'
-  const login = {
-    grant_Type: 'password',
-    username: loginData.userName,
-    password: loginData.password,
-    client_Id: process.env.VUE_APP_CLIENT_ID,
-    client_Secret: process.env.VUE_APP_CLIENT_SECRET
-  }
-  return request({
-    baseURL: IdentityServerUrl,
-    url: _url,
-    method: 'post',
-    data: qs.stringify(login),
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+  public getUsers(input: UsersGetRequestDto) {
+    let _url = '/api/identity/users'
+    _url += '?skipCount=' + pagerFormat(input.skipCount)
+    _url += '&maxResultCount=' + input.maxResultCount
+    if (input.sorting) {
+      _url += '&sorting=' + input.sorting
     }
-  })
-}
-
-/** 获取用户信息
- * @param userId 用户标识
- * @returns 返回类型为 UserDataDto 的用户信息
- */
-export function getUserInfo() {
-  const _url = '/connect/userinfo'
-  return request({
-    baseURL: IdentityServerUrl,
-    url: _url,
-    method: 'get'
-  })
-}
-
-/** 用户退出登录
- * @param token 用户token刷新对象
- */
-export function userLogout(token: string | undefined) {
-  if (token) {
-    const _url = '/connect/revocation'
-    const loginOut = {
-      token: token,
-      client_Id: process.env.VUE_APP_CLIENT_ID,
-      client_Secret: process.env.VUE_APP_CLIENT_SECRET
+    if (input.filter) {
+      _url += '&filter=' + input.filter
     }
-    return request({
-      baseURL: IdentityServerUrl,
+    return this.Get<PagedResultDto<UserDataDto>>(_url)
+  }
+
+  public getUserById(userId: string) {
+    let _url = '/api/identity/users/'
+    _url += userId
+    return this.Get<UserDataDto>(_url)
+  }
+
+  public getUserByName(userName: string) {
+    let _url = '/api/identity/users/by-username/'
+    _url += userName
+    return this.Get<UserDataDto>(_url)
+  }
+
+  public updateUser(userId: string | undefined, userData: UserUpdateDto) {
+    let _url = '/api/identity/users/'
+    _url += userId
+    return this.Put<UserDataDto>(_url, userData)
+  }
+
+  public deleteUser(userId: string | undefined) {
+    let _url = '/api/identity/users/'
+    _url += userId
+    return this.Delete(_url)
+  }
+
+  public createUser(userData: UserCreateDto) {
+    const _url = '/api/identity/users'
+    return this.Post<UserDataDto>(_url, userData)
+  }
+
+  public getUserRoles(userId: string) {
+    let _url = '/api/identity/users'
+    _url += '/' + userId
+    _url += '/roles'
+    return this.Get<UserRoleDto>(_url)
+  }
+
+  public setUserRoles(userId: string, roles: string[]) {
+    let _url = '/api/identity/users'
+    _url += '/' + userId
+    _url += '/roles'
+    return this.OriginPut(_url, { RoleNames: roles })
+  }
+
+  public changePassword(input: UserChangePasswordDto) {
+    const _url = '/api/identity/my-profile/change-password'
+    return this.OriginPost(_url, input)
+  }
+
+  public userRegister(registerData: UserRegisterData) {
+    const _url = '/api/account/register'
+    return this.HttpRequest<UserDataDto>({
+      baseURL: this.IdentityServerUrl,
       url: _url,
-      method: 'post',
-      data: qs.stringify(loginOut),
+      method: 'POST',
+      data: registerData
+    })
+  }
+
+  public getUserInfo() {
+    const _url = '/connect/userinfo'
+    return this.HttpRequest<UserInfo>({
+      baseURL: this.IdentityServerUrl,
+      url: _url,
+      method: 'GET'
+    })
+  }
+
+  public userLogin(loginData: UserLoginData) {
+    const _url = '/connect/token'
+    const login = {
+      grant_type: 'password',
+      username: loginData.userName,
+      password: loginData.password,
+      client_id: process.env.VUE_APP_CLIENT_ID,
+      client_secret: process.env.VUE_APP_CLIENT_SECRET
+    }
+    return this.HttpRequest<UserLoginResult>({
+      baseURL: this.IdentityServerUrl,
+      url: _url,
+      method: 'POST',
+      data: qs.stringify(login),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
+  }
+
+  public userLogout(token: string | undefined) {
+    if (token) {
+      const _url = '/connect/revocation'
+      const loginOut = {
+        token: token,
+        client_td: process.env.VUE_APP_CLIENT_ID,
+        client_secret: process.env.VUE_APP_CLIENT_SECRET
+      }
+      return this.HttpRequestWithOriginResponse({
+        baseURL: this.IdentityServerUrl,
+        url: _url,
+        method: 'post',
+        data: qs.stringify(loginOut),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      })
+    }
   }
 }
 
@@ -313,7 +227,7 @@ export class UserChangePasswordDto {
 /** 用户角色对象 */
 export class UserRoleDto {
   /** 角色列表 */
-  items?: IUserRole[]
+  items: IUserRole[]
 
   constructor() {
     this.items = new Array<IUserRole>()

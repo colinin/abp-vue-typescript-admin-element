@@ -255,7 +255,7 @@ export default class extends Vue {
 
   /** 获取角色权限列表 */
   private handleGetRolePermissions(role: RoleDto) {
-    getPermissionsByKey('Role', role.name).then(res => {
+    getPermissionsByKey('R', role.name).then(res => {
       this.rolePermission = res.data
       this.hasLoadPermission = true
     })
@@ -266,7 +266,7 @@ export default class extends Vue {
     if (this.rolePermissionChanged) {
       const setRolePermissions = new UpdatePermissionsDto()
       setRolePermissions.permissions = this.editRolePermissions
-      await setPermissionsByKey('Role', this.rolePermission.entityDisplayName, setRolePermissions)
+      await setPermissionsByKey('R', this.rolePermission.entityDisplayName, setRolePermissions)
     }
     this.rolePermission = new PermissionDto()
     this.hasLoadPermission = false

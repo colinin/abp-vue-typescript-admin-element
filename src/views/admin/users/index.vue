@@ -165,7 +165,7 @@
     >
       <UserProfile
         v-if="showUserProfile"
-        :user-profile="editUserProfile"
+        :user-id="editUserId"
         @onClose="handleCloseUserProfile"
         @onUserProfileChanged="handleUserProfileChanged"
       />
@@ -174,10 +174,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Provide } from 'vue-property-decorator'
 import Pagination from '@/components/Pagination/index.vue'
 import { dateFormat } from '@/utils'
-import { getUsers, deleteUser, UserDataDto, UsersGetRequestDto } from '@/api/users'
+import { UserApiService, UserDataDto, UsersGetRequestDto } from '@/api/users'
 import UserProfile from './components/UserProfile.vue'
 import { checkPermission } from '@/utils/permission'
 
@@ -205,7 +205,7 @@ export default class extends Vue {
   /** 最大用户数量 */
   private totalCount: number
   /** 当前编辑用户 */
-  private editUserProfile: UserDataDto
+  private editUserId: string
   /** 是否显示用户详情页 */
   private showUserProfile: boolean
   /** 用户详情页标题 */
@@ -214,11 +214,16 @@ export default class extends Vue {
   private sortRule: { prop: string, sort: string }
   /** 查询用户过滤参数 */
   private getUserQuery: {page: number, limit: number, filter: string}
+  // TODO: 有什么方法让它也是通过依赖注入来的,而不是每次实例化
+  /** 用户api接口服务 */
+  @Provide('UserApiService')
+  public userApiService: UserApiService
 
   constructor() {
     super()
     this.totalCount = 0
-    this.editUserProfile = new UserDataDto()
+    this.userApiService = new UserApiService()
+    this.editUserId = ''
     this.showUserProfile = false
     this.userListLoading = false
     this.userProfileTitle = ''
@@ -243,9 +248,9 @@ export default class extends Vue {
     getUserListInput.sorting = this.sortRule.sort
     getUserListInput.skipCount = this.getUserQuery.page
     getUserListInput.maxResultCount = this.getUserQuery.limit
-    getUsers(getUserListInput).then(res => {
-      this.totalCount = res.data.totalCount
-      this.userList = res.data.items
+    this.userApiService.getUsers(getUserListInput).then(res => {
+      this.totalCount = res.totalCount
+      this.userList = res.items
       this.userListLoading = false
     })
   }
@@ -261,14 +266,14 @@ export default class extends Vue {
    * @param row 操作行数据,可以转换为 UserDataDto 对象
    */
   private handleShowUserProfile(row: any) {
-    this.editUserProfile = row
+    this.editUserId = row.id
     this.userProfileTitle = this.$t('users.updateUser', { namec: row.name })
     this.showUserProfile = true
   }
 
   /** 响应用户详情页关闭事件 */
   private handleCloseUserProfile() {
-    this.editUserProfile = new UserDataDto()
+    this.editUserId = ''
     this.showUserProfile = false
   }
 
@@ -279,7 +284,7 @@ export default class extends Vue {
 
   /** 新增用户事件,打开用户详情页 */
   private handleCreateUser() {
-    this.editUserProfile = new UserDataDto()
+    this.editUserId = ''
     this.userProfileTitle = this.$t('users.createUser')
     this.showUserProfile = true
   }
@@ -303,7 +308,7 @@ export default class extends Vue {
       this.$t('users.whetherDeleteUser', { name: row.userName }).toString(), {
         callback: (action) => {
           if (action === 'confirm') {
-            deleteUser(row.id).then(() => {
+            this.userApiService.deleteUser(row.id).then(() => {
               this.$message.success(this.$t('users.userHasBeenDeleted', { name: row.userName }).toString())
               this.handleGetUsers()
             })

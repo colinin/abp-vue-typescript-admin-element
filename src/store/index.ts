@@ -6,7 +6,6 @@ import { ITagsViewState } from './modules/tags-view'
 import { IErrorLogState } from './modules/error-log'
 import { IPermissionState } from './modules/permission'
 import { ISettingsState } from './modules/settings'
-import { IMultiTenant } from './modules/tenant'
 import { IRoleState } from './modules/role'
 
 Vue.use(Vuex)
@@ -18,7 +17,6 @@ export interface IRootState {
   errorLog: IErrorLogState
   permission: IPermissionState
   settings: ISettingsState
-  tenant: IMultiTenant
   role: IRoleState
 }
 

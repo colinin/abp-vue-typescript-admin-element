@@ -66,7 +66,8 @@ export default {
     tasks: '任务中心',
     admin: '管理页',
     users: '用户管理',
-    roles: '角色管理'
+    roles: '角色管理',
+    settings: '配置管理'
   },
   navbar: {
     logOut: '退出登录',

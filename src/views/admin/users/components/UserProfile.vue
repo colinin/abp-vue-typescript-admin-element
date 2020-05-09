@@ -132,16 +132,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator'
+import { Component, Vue, Prop, Inject } from 'vue-property-decorator'
 import {
-  getUserRoles,
   UserDataDto,
-  updateUser,
   UserUpdateDto,
-  createUser,
   UserCreateDto,
-  IUserRole,
-  setUserRoles
+  UserApiService
 } from '@/api/users'
 import { getRoles } from '@/api/roles'
 import { setPermissionsByKey, getPermissionsByKey, PermissionDto, UpdatePermissionsDto } from '@/api/permission'
@@ -160,13 +156,14 @@ import { checkPermission } from '@/utils/permission'
   }
 })
 export default class extends Vue {
-  @Prop({ default: new UserDataDto() }) private userProfile!: UserDataDto
+  @Prop({ default: '' }) private userId!: string
   private roleList: {key: string, label: string, disabled: boolean}[]
   /** 用户组 */
   private userRoles: string[]
   private userPassword: string
   private hasEditUser: boolean
   private userRolesChanged: boolean
+  private userProfile: UserDataDto
   /** 是否加载用户权限 */
   private hasLoadPermission: boolean
   /** 用户权限数据 */
@@ -175,6 +172,9 @@ export default class extends Vue {
   private userPermissionChanged: boolean
   /** 变更用户权限数据 */
   private editUserPermissions: IPermission[]
+  /** 用户api服务 */
+  @Inject('UserApiService')
+  private userApiService!: UserApiService
 
   constructor() {
     super()
@@ -184,6 +184,7 @@ export default class extends Vue {
     this.hasLoadPermission = false
     this.userPermissionChanged = false
     this.userRoles = new Array<string>()
+    this.userProfile = new UserDataDto()
     this.userPermission = new PermissionDto()
     this.editUserPermissions = new Array<IPermission>()
     this.roleList = new Array<{key: string, label: string, disabled: boolean}>()
@@ -220,12 +221,15 @@ export default class extends Vue {
 
   mounted() {
     this.handleGetRoles()
-    if (this.userProfile.id) {
-      if (this.allowedChangePermissions()) {
-        this.handleGetUserPermissions(this.userProfile.id)
-      }
-      this.handleGetUserRoles(this.userProfile.id)
-      this.hasEditUser = true
+    if (this.userId) {
+      this.userApiService.getUserById(this.userId).then(user => {
+        this.userProfile = user
+        if (this.allowedChangePermissions()) {
+          this.handleGetUserPermissions(this.userId)
+        }
+        this.handleGetUserRoles(this.userId)
+        this.hasEditUser = true
+      })
     }
   }
 
@@ -235,7 +239,7 @@ export default class extends Vue {
   }
 
   private handleGetUserPermissions(id: string) {
-    getPermissionsByKey('User', id).then(res => {
+    getPermissionsByKey('R', id).then(res => {
       this.userPermission = res.data
       this.hasLoadPermission = true
     })
@@ -266,14 +270,13 @@ export default class extends Vue {
     }
   }
 
-  private handleGetUserRoles(userId: string) {
-    getUserRoles(userId).then(res => {
-      this.userRoles = res.data.items.map((userRole: IUserRole) => {
-        return userRole.name
-      })
-      // 监听用户组变化
-      this.$watch('userRoles', this.onUserRolesChanged)
-    })
+  private async handleGetUserRoles(userId: string) {
+    const userRoleDto = await this.userApiService.getUserRoles(userId)
+    this.userRoles = userRoleDto.items.map(r => r.name)
+    // 监听用户组变化
+    this.$watch('userRoles', this.onUserRolesChanged)
+    // const data = await getSettings('U', UserModule.id)
+    // console.log(data)
   }
 
   private onPermissionChanged(permissions: IPermission[]) {
@@ -286,48 +289,22 @@ export default class extends Vue {
     userProfileForm.validate(async(valid: boolean) => {
       if (valid) {
         if (!this.hasEditUser) {
-          const createUserInput = new UserCreateDto()
-          createUserInput.name = this.userProfile.name
-          createUserInput.userName = this.userProfile.userName
-          createUserInput.password = this.userPassword
-          createUserInput.surname = this.userProfile.surname
-          createUserInput.email = this.userProfile.email
-          createUserInput.phoneNumber = this.userProfile.phoneNumber
-          createUserInput.twoFactorEnabled = this.userProfile.twoFactorEnabled
-          createUserInput.lockoutEnabled = this.userProfile.lockoutEnabled
-          createUserInput.roleNames = this.userRoles
-          const { data } = await createUser(createUserInput)
-          this.userProfile.id = data.id
-          this.userProfile.creatorId = data.creatorId
-          this.userProfile.creatorTime = data.creatorTime
-          this.userProfile.concurrencyStamp = data.concurrencyStamp
-          this.userProfile.tenentId = data.tenentId
+          const createUserInput = this.createAddUserDto()
+          this.userProfile = await this.userApiService.createUser(createUserInput)
           this.$message.success(this.$t('users.createUserSuccess', { name: this.userProfile.name }).toString())
         } else {
-          const updateUserInput = new UserUpdateDto()
-          updateUserInput.name = this.userProfile.name
-          updateUserInput.userName = this.userProfile.userName
-          updateUserInput.surname = this.userProfile.surname
-          updateUserInput.email = this.userProfile.email
-          updateUserInput.phoneNumber = this.userProfile.phoneNumber
-          updateUserInput.twoFactorEnabled = this.userProfile.twoFactorEnabled
-          updateUserInput.lockoutEnabled = this.userProfile.lockoutEnabled
-          updateUserInput.roles = this.userRoles
-          updateUserInput.concurrencyStamp = this.userProfile.concurrencyStamp
-          const { data } = await updateUser(this.userProfile.id, updateUserInput)
-          this.userProfile.lastModifierId = data.lastModifierId
-          this.userProfile.lastModificationTime = data.lastModificationTime
-          this.userProfile.concurrencyStamp = data.concurrencyStamp
-          this.userProfile.tenentId = data.tenentId
+          const updateUserInput = this.createEditUserDto()
+          const user = await this.userApiService.updateUser(this.userProfile.id, updateUserInput)
+          this.userProfile = user
           this.$message.success(this.$t('users.updateUserSuccess', { name: this.userProfile.name }).toString())
         }
         if (this.userRolesChanged) {
-          await setUserRoles(this.userProfile.id, this.userRoles)
+          await this.userApiService.setUserRoles(this.userProfile.id, this.userRoles)
         }
         if (this.userPermissionChanged) {
           const setUserPermissions = new UpdatePermissionsDto()
           setUserPermissions.permissions = this.editUserPermissions
-          await setPermissionsByKey('User', this.userProfile.id, setUserPermissions)
+          await setPermissionsByKey('U', this.userProfile.id, setUserPermissions)
         }
         this.$emit('onUserProfileChanged', this.userProfile.id)
         this.onCancel()
@@ -344,6 +321,34 @@ export default class extends Vue {
   private resetForm(formName: string) {
     const userProfileForm = this.$refs[formName] as any
     userProfileForm.resetFields()
+  }
+
+  private createAddUserDto() {
+    const createUserInput = new UserCreateDto()
+    createUserInput.name = this.userProfile.name
+    createUserInput.userName = this.userProfile.userName
+    createUserInput.password = this.userPassword
+    createUserInput.surname = this.userProfile.surname
+    createUserInput.email = this.userProfile.email
+    createUserInput.phoneNumber = this.userProfile.phoneNumber
+    createUserInput.twoFactorEnabled = this.userProfile.twoFactorEnabled
+    createUserInput.lockoutEnabled = this.userProfile.lockoutEnabled
+    createUserInput.roleNames = this.userRoles
+    return createUserInput
+  }
+
+  private createEditUserDto() {
+    const updateUserInput = new UserUpdateDto()
+    updateUserInput.name = this.userProfile.name
+    updateUserInput.userName = this.userProfile.userName
+    updateUserInput.surname = this.userProfile.surname
+    updateUserInput.email = this.userProfile.email
+    updateUserInput.phoneNumber = this.userProfile.phoneNumber
+    updateUserInput.twoFactorEnabled = this.userProfile.twoFactorEnabled
+    updateUserInput.lockoutEnabled = this.userProfile.lockoutEnabled
+    updateUserInput.roles = this.userRoles
+    updateUserInput.concurrencyStamp = this.userProfile.concurrencyStamp
+    return updateUserInput
   }
 }
 </script>

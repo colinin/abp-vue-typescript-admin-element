@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import { pagerFormat } from '@/utils'
 import { PagedResultDto, PagedAndSortedResultRequestDto } from './types'
 
 export function getTenantByName(name: string) {
-  let _url = '/api/abp/multi-tenancy/find-tenant/'
+  let _url = '/api/abp/multi-tenancy/tenants/by-name/'
   _url += name
   return request({
     baseURL: process.env.VUE_APP_BASE_IDENTITY_SERVICE,
@@ -15,7 +16,7 @@ export async function getTenants(payload: TenantGetRequestDto): Promise<PagedRes
   let _url = '/api/multi-tenancy/tenants'
   _url += '?filter=' + payload.filter
   _url += '&sorting=' + payload.sorting
-  _url += '&skipCount=' + payload.skipCount
+  _url += '&skipCount=' + pagerFormat(payload.skipCount)
   _url += '&maxResultCount=' + payload.maxResultCount
   return new Promise<PagedResultDto<TenantDto>>((resolve, reject) => {
     request({
@@ -38,6 +39,8 @@ export class TenantGetRequestDto extends PagedAndSortedResultRequestDto {
 
   constructor() {
     super()
+    this.filter = ''
+    this.sorting = ''
     this.skipCount = 1
     this.maxResultCount = 25
   }

@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { UserChangePasswordDto, changePassword as userChangePassword } from '@/api/users'
+import { UserChangePasswordDto, UserApiService } from '@/api/users'
 
 class ChangePassword {
   oldPassword!: string
@@ -70,10 +70,12 @@ class ChangePassword {
 export default class extends Vue {
   @Prop({ default: '' }) private userId!: string
   private changePassword: ChangePassword
+  private userApiService: UserApiService
 
   constructor() {
     super()
     this.changePassword = new ChangePassword()
+    this.userApiService = new UserApiService()
   }
 
   private onSubmit() {
@@ -83,7 +85,7 @@ export default class extends Vue {
         const changePasswordInput = new UserChangePasswordDto()
         changePasswordInput.currentPassword = this.changePassword.oldPassword
         changePasswordInput.newPassword = this.changePassword.newPassword
-        userChangePassword(changePasswordInput).then(() => {
+        this.userApiService.changePassword(changePasswordInput).then(() => {
           this.$message.success('密码已变更!')
           this.onCancel()
         })
